@@ -51,13 +51,18 @@ def can_send_message(user_id):
 
 
 def get_hash_favicon(domain):
-    url = f'https://{domain}/favicon.ico'
+    domain_https = f'https://{domain}/favicon.ico'
+    domain_http = f'http://{domain}/favicon.ico'
     try:
-        favicon_resp = requests.get(url, timeout=5)
+        favicon_resp = requests.get(domain_https, timeout=5)
         if favicon_resp.status_code == 200:
             md5 = hashlib.md5(favicon_resp.content).hexdigest()
             return f"{domain}: MD5 Hash - {md5}"
         else:
+            favicon_resp = requests.get(domain_http, timeout=5)
+            if favicon_resp.status_code == 200:
+                md5 = hashlib.md5(favicon_resp.content).hexdigest()
+                return f"{domain}: MD5 Hash - {md5}"
             return None
     except requests.RequestException:
         return None
