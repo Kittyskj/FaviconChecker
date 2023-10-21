@@ -7,7 +7,7 @@ Eeasy tool configured like telegram bot to check Favicon hash in md5
 git clone https://github.com/Kittyskj/FaviconChecker \
  && cd FaviconChecker \
  && pip install -r requirements.txt \
- && python3 favcheck.py
+ && python favcheck.py
 ```
 
 ## Roadmap
