@@ -3,12 +3,13 @@ import hashlib
 import telebot
 import re
 import time
+from concurrent.futures.thread import ThreadPoolExecutor
 
 user_last_message_time = {}
 
 bot = telebot.TeleBot("6937574350:AAEjG2-Rtg-Npt78HAAe6WZ9Cnm3ML5Ji20")
 author_name = "ran_mao"
-
+threads = 10
 
 @bot.message_handler(commands=['start'])
 def welcome(message):
@@ -18,6 +19,11 @@ def welcome(message):
 			f'Send to this bot domain u want to be cheked. Example: google.com, do not sent url.\n'
 	bot.send_message(message.from_user.id, welcome_msg)
 
+def get_favicon(domain):
+	domain.strip()
+	if not is_valid_domain(domain): return None
+	result = get_hash_favicon(domain)
+	return result
 
 @bot.message_handler(content_types=['text'])
 def process_domain(message):
@@ -40,11 +46,12 @@ def process_file_domains(message):
 	if file_name.split('.')[-1] in ['csv', 'lst', 'txt']:
 		downloaded_file = bot.download_file(bot.get_file(message.document.file_id).file_path)
 		results = []
-		for line in downloaded_file.decode().split('\n'):
-			domain = line.strip()
-			if is_valid_domain(domain):
-				result = get_hash_favicon(domain)
-				print(result)
+		with ThreadPoolExecutor(max_workers=threads) as executor:
+			pre_results = executor.map(
+				get_favicon,
+				downloaded_file.decode().split('\n')
+			)
+			for result in pre_results:
 				if result:
 					results.append(result[0])
 
